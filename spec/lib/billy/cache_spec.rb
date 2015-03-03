@@ -11,6 +11,7 @@ describe Billy::Cache do
     let(:fragment_url) { "#{base_url}/#{fragment}" }
     let(:params_url) { "#{base_url}#{params}" }
     let(:params_url_with_callback) { "#{base_url}#{params}#{callback}" }
+    let(:params_url_with_nil_keys) {"#{base_url}#{params}#{callback}&1234567"}
     let(:params_fragment_url) { "#{base_url}#{params}#{fragment}" }
 
     context 'with ignore_params set to false' do
@@ -36,6 +37,12 @@ describe Billy::Cache do
           allow(Billy.config).to receive(:dynamic_jsonp_keys) { ['foo'] }
 
           expect(cache.format_url(params_url_with_callback, false, true)).to eq "#{base_url}?callback=quux"
+        end
+
+        it 'ignores params with nil keys if Billy.config.dynamic_jsonp_nil_keys is true' do
+          allow(Billy.config).to receive(:dynamic_jsonp_nil_keys) { true }
+
+          expect(cache.format_url(params_url_with_nil_keys, false, true)).to eq "#{base_url}?foo=bar"
         end
       end
 

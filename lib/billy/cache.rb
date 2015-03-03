@@ -99,9 +99,7 @@ module Billy
 
       if url.query
         query_string = if dynamic_jsonp
-                         query_hash = Rack::Utils.parse_query(url.query)
-                         Billy.config.dynamic_jsonp_keys.each { |k| query_hash.delete(k) }
-                         Rack::Utils.build_query(query_hash)
+                         format_dynamic_jsonp_querystring(url.query)
                        else
                          url.query
                        end
@@ -112,6 +110,13 @@ module Billy
       formatted_url += '#' + url.fragment if url.fragment
 
       formatted_url
+    end
+
+    def format_dynamic_jsonp_querystring(query)
+      query_hash = Rack::Utils.parse_query(query)
+      Billy.config.dynamic_jsonp_keys.each { |k| query_hash.delete(k) }
+      query_hash.delete_if { |k,v| v.nil? } if Billy.config.dynamic_jsonp_nil_keys
+      Rack::Utils.build_query(query_hash)
     end
 
     def cache_file(key)
